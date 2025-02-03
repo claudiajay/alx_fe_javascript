@@ -10,18 +10,59 @@ function saveQuotes() {
   localStorage.setItem("quotes", JSON.stringify(quotes));
 }
 
+// Function to send new quotes to the simulated server
+async function sendQuoteToServer(quote) {
+  try {
+    const response = await fetch(SERVER_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(quote),
+    });
+
+    const data = await response.json();
+    console.log("Quote successfully sent to server:", data);
+  } catch (error) {
+    console.error("Failed to send quote to server:", error);
+  }
+}
+
+// Function to create a new quote
+function createAddQuoteForm() {
+  const newQuoteText = document.getElementById("newQuoteText").value;
+  const newQuoteCategory = document.getElementById("newQuoteCategory").value;
+
+  if (newQuoteText && newQuoteCategory) {
+    const newQuote = { text: newQuoteText, category: newQuoteCategory };
+
+    // Add to local storage
+    quotes.push(newQuote);
+    saveQuotes();
+    populateCategories();
+    alert("New quote added!");
+
+    // Send to simulated server
+    sendQuoteToServer(newQuote);
+
+    // Clear input fields
+    document.getElementById("newQuoteText").value = '';
+    document.getElementById("newQuoteCategory").value = '';
+  } else {
+    alert("Please fill out both fields.");
+  }
+}
+
 // Function to fetch new quotes from a simulated server
 async function fetchQuotesFromServer() {
   try {
     console.log("Fetching latest quotes from server...");
     
-    // Simulating an API call (mock response)
     const response = await fetch(SERVER_URL);
     const serverQuotes = await response.json();
 
-    // Convert mock API data to match our format
     const newQuotes = serverQuotes.slice(0, 5).map(item => ({
-      text: item.title,  // Using "title" from JSONPlaceholder as a quote
+      text: item.title,  
       category: "General"
     }));
 
@@ -39,10 +80,8 @@ function resolveConflicts(serverQuotes) {
     const existingQuoteIndex = quotes.findIndex(q => q.text === serverQuote.text);
 
     if (existingQuoteIndex === -1) {
-      // If quote doesn't exist, add it
       quotes.push(serverQuote);
     } else {
-      // Conflict detected (same quote, different category)
       if (quotes[existingQuoteIndex].category !== serverQuote.category) {
         quotes[existingQuoteIndex] = serverQuote;
         conflictDetected = true;
@@ -59,7 +98,7 @@ function resolveConflicts(serverQuotes) {
   }
 }
 
-// Function to sync quotes periodically (every 30 seconds)
+// Function to start auto-sync
 function startAutoSync() {
   setInterval(fetchQuotesFromServer, 30000);
 }
@@ -104,23 +143,6 @@ function populateCategories() {
 // Function to manually trigger a sync
 function manualSync() {
   fetchQuotesFromServer();
-}
-
-// Function to create a new quote
-function createAddQuoteForm() {
-  const newQuoteText = document.getElementById("newQuoteText").value;
-  const newQuoteCategory = document.getElementById("newQuoteCategory").value;
-
-  if (newQuoteText && newQuoteCategory) {
-    quotes.push({ text: newQuoteText, category: newQuoteCategory });
-    saveQuotes();
-    alert("New quote added!");
-    populateCategories();
-    document.getElementById("newQuoteText").value = '';
-    document.getElementById("newQuoteCategory").value = '';
-  } else {
-    alert("Please fill out both fields.");
-  }
 }
 
 // Event listeners
