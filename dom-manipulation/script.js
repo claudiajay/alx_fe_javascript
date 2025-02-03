@@ -141,14 +141,14 @@ function populateCategories() {
 }
 
 // Function to manually trigger a sync
-function manualSync() {
+function syncQuotes() {
   fetchQuotesFromServer();
 }
 
 // Event listeners
 document.getElementById("newQuote").addEventListener("click", filterQuotes);
 document.getElementById("addQuoteButton").addEventListener("click", createAddQuoteForm);
-document.getElementById("syncButton").addEventListener("click", manualSync);
+document.getElementById("syncButton").addEventListener("click", syncQuotes);
 
 // Initialize the application
 window.onload = function() {
